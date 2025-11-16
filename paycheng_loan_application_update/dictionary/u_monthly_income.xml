@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sys_dictionary action="INSERT_OR_UPDATE" display_value="Monthly Income" name="u_monthly_income" sys_class_name="sys_dictionary" sys_id="u_monthly_income_loan_app" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sys_dictionary_u_monthly_income_loan_app" table="x_1603889_paycheng_loan_application" update_synch="true">
+    <access_control_required>false</access_control_required>
+    <active>true</active>
+    <audit>false</audit>
+    <collection_element>false</collection_element>
+    <collection_table/>
+    <column_label>Monthly Income</column_label>
+    <column_name>u_monthly_income</column_name>
+    <create_roles/>
+    <default_value/>
+    <delete_roles/>
+    <dependent>false</dependent>
+    <dependent_on_field/>
+    <element>true</element>
+    <element_reference>false</element_reference>
+    <foreign_database/>
+    <function_definition/>
+    <internal_type>decimal</internal_type>
+    <mandatory>true</mandatory>
+    <max_length>40</max_length>
+    <read_roles/>
+    <reference_cascade_rule/>
+    <reference_floats>true</reference_floats>
+    <reference_key/>
+    <reference_qual/>
+    <reference_qual_condition/>
+    <reference_type/>
+    <reference_table/>
+    <size_class>1</size_class>
+    <staged>false</staged>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>u_monthly_income_loan_app</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>u_monthly_income</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sys_dictionary_u_monthly_income_loan_app</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <table_reference>false</table_reference>
+    <text_index>false</text_index>
+    <unique>false</unique>
+    <use_dependent_field>false</use_dependent_field>
+    <use_dynamic_default>false</use_dynamic_default>
+    <use_reference_qualifier>always</use_reference_qualifier>
+    <virtual>false</virtual>
+    <widget>currency</widget>
+    <write_roles/>
+</sys_dictionary>
+

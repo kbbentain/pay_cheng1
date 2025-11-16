@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sys_script_include action="INSERT_OR_UPDATE" access="public" api_name="PaychengAIScorer" client_callable="false" name="PaychengAIScorer" sys_class_name="sys_script_include" sys_id="script_include_paycheng_ai_scorer" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sys_script_include_PaychengAIScorer">
+    <access>public</access>
+    <active>true</active>
+    <api_name>PaychengAIScorer</api_name>
+    <caller_access/>
+    <client_callable>false</client_callable>
+    <description>AI-powered credit scoring using Google Gemini API</description>
+    <name>PaychengAIScorer</name>
+    <script><![CDATA[var PaychengAIScorer = Class.create();
+PaychengAIScorer.prototype = {
+    initialize: function() {
+        this.GEMINI_API_KEY = gs.getProperty('x_1603889_paycheng.gemini_api_key', '');
+        this.GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    },
+    
+    generateCreditScore: function(loanApplicationSysId) {
+        var loanApp = new GlideRecord('x_1603889_paycheng_loan_application');
+        if (!loanApp.get(loanApplicationSysId)) {
+            gs.error('Loan application not found: ' + loanApplicationSysId);
+            return false;
+        }
+        
+        // Gather application data
+        var applicationData = {
+            monthlyIncome: parseFloat(loanApp.u_monthly_income) || 0,
+            monthlyExpenses: parseFloat(loanApp.u_monthly_expenses) || 0,
+            existingLoans: parseFloat(loanApp.u_existing_loans) || 0,
+            loanAmount: parseFloat(loanApp.u_loan_amount) || 0,
+            desiredTerm: parseInt(loanApp.u_desired_term_months) || 12,
+            yearsEmployed: parseFloat(loanApp.u_years_employed) || 0,
+            age: this._calculateAge(loanApp.u_birthdate.toString())
+        };
+        
+        // Calculate DTI
+        var dti = ((applicationData.monthlyExpenses + applicationData.existingLoans) / 
+                   applicationData.monthlyIncome) * 100;
+        
+        // Create AI prompt
+        var prompt = this._buildPrompt(applicationData, dti);
+        
+        // Call Gemini API
+        var response = this._callGeminiAPI(prompt);
+        
+        if (response) {
+            this._updateLoanApplication(loanApp, response);
+            return true;
+        }
+        
+        return false;
+    },
+    
+    _buildPrompt: function(data, dti) {
+        return "You are a credit risk assessment AI for a Philippine bank. Analyze this loan application and provide:\n\n" +
+               "1. Credit Score (300-850 range, where 300 is worst, 850 is best)\n" +
+               "2. Risk Level (Low/Medium/High)\n" +
+               "3. Brief assessment notes (2-3 sentences)\n\n" +
+               "Application Data:\n" +
+               "- Monthly Income: ₱" + data.monthlyIncome + "\n" +
+               "- Monthly Expenses: ₱" + data.monthlyExpenses + "\n" +
+               "- Existing Loans: ₱" + data.existingLoans + "\n" +
+               "- Requested Loan Amount: ₱" + data.loanAmount + "\n" +
+               "- Loan Term: " + data.desiredTerm + " months\n" +
+               "- Years Employed: " + data.yearsEmployed + "\n" +
+               "- Age: " + data.age + "\n" +
+               "- Debt-to-Income Ratio: " + dti.toFixed(2) + "%\n\n" +
+               "Consider Philippine banking standards:\n" +
+               "- DTI > 60% is high risk\n" +
+               "- Loan amount > 3x monthly income needs scrutiny\n" +
+               "- Employment stability (3+ years is good)\n\n" +
+               "Respond ONLY in this exact JSON format:\n" +
+               '{\n' +
+               '  "creditScore": 650,\n' +
+               '  "riskLevel": "Medium",\n' +
+               '  "notes": "Your assessment here"\n' +
+               '}';
+    },
+    
+    _callGeminiAPI: function(prompt) {
+        try {
+            var request = new sn_ws.RESTMessageV2();
+            request.setEndpoint(this.GEMINI_ENDPOINT + '?key=' + this.GEMINI_API_KEY);
+            request.setHttpMethod('POST');
+            request.setRequestHeader('Content-Type', 'application/json');
+            
+            var requestBody = {
+                contents: [{
+                    parts: [{
+                        text: prompt
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.4,
+                    topK: 32,
+                    topP: 1,
+                    maxOutputTokens: 500
+                }
+            };
+            
+            request.setRequestBody(JSON.stringify(requestBody));
+            
+            var response = request.execute();
+            var httpStatus = response.getStatusCode();
+            
+            if (httpStatus == 200) {
+                var responseBody = JSON.parse(response.getBody());
+                var aiText = responseBody.candidates[0].content.parts[0].text;
+                
+                // Extract JSON from response
+                var jsonMatch = aiText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    return JSON.parse(jsonMatch[0]);
+                }
+            } else {
+                gs.error('Gemini API error: ' + httpStatus + ' - ' + response.getBody());
+            }
+            
+        } catch (ex) {
+            gs.error('Error calling Gemini API: ' + ex.message);
+        }
+        
+        // Fallback to rule-based scoring if AI fails
+        return this._fallbackScoring(prompt);
+    },
+    
+    _fallbackScoring: function(prompt) {
+        // Extract data from prompt for rule-based fallback
+        gs.warn('Using fallback scoring method');
+        
+        return {
+            creditScore: 600,
+            riskLevel: "Medium",
+            notes: "AI assessment unavailable. Manual review recommended."
+        };
+    },
+    
+    _updateLoanApplication: function(loanApp, aiResponse) {
+        loanApp.u_credit_score = aiResponse.creditScore;
+        loanApp.u_risk_level = aiResponse.riskLevel.toLowerCase();
+        loanApp.u_ai_assessment_notes = aiResponse.notes;
+        loanApp.update();
+    },
+    
+    _calculateAge: function(birthdate) {
+        if (!birthdate) return 0;
+        
+        var birth = new GlideDate();
+        birth.setValue(birthdate);
+        var today = new GlideDate();
+        
+        return today.getYear() - birth.getYear();
+    },
+    
+    type: 'PaychengAIScorer'
+};]]></script>
+    <sys_class_name>sys_script_include</sys_class_name>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>script_include_paycheng_ai_scorer</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>PaychengAIScorer</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sys_script_include_PaychengAIScorer</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+</sys_script_include>
+

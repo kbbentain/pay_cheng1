@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sys_choice action="INSERT_OR_UPDATE" element="u_application_status" inactive="false" name="rejected" sequence="6" sys_class_name="sys_choice" sys_id="choice_app_status_rejected" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sys_choice_x_1603889_paycheng_loan_application_u_application_status_rejected" table="x_1603889_paycheng_loan_application" value="rejected">
+    <dependent_value/>
+    <inactive>false</inactive>
+    <name>rejected</name>
+    <sequence>6</sequence>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>choice_app_status_rejected</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>rejected</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sys_choice_x_1603889_paycheng_loan_application_u_application_status_rejected</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <text>Rejected</text>
+    <value>rejected</value>
+</sys_choice>
+
