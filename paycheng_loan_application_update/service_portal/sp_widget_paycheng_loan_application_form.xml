@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sp_widget action="INSERT_OR_UPDATE" category="custom" css="" data_table="x_1603889_paycheng_loan_application" description="Loan Application Form for Paycheng Bank" id="paycheng_loan_application_form" name="Loan Application Form" public="true" sys_class_name="sp_widget" sys_id="widget_loan_app_form" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sp_widget_paycheng_loan_application_form">
+    <category>custom</category>
+    <client_script><![CDATA[function($scope, spUtil) {
+  var c = this;
+  
+  c.application = {
+    fullName: '',
+    birthdate: '',
+    contactNumber: '',
+    email: '',
+    address: '',
+    employerName: '',
+    jobPosition: '',
+    monthlyIncome: 0,
+    yearsEmployed: 0,
+    loanAmount: 0,
+    desiredTerm: '12',
+    loanPurpose: '',
+    existingLoans: 0,
+    monthlyExpenses: 0,
+    validId: null
+  };
+  
+  c.estimate = {};
+  c.submitting = false;
+  c.successMessage = '';
+  c.errorMessage = '';
+  c.applicationNumber = '';
+  
+  // Calculate loan estimate
+  c.calculateEstimate = function() {
+    var amount = parseFloat(c.application.loanAmount) || 0;
+    var term = parseInt(c.application.desiredTerm) || 12;
+    var annualRate = 0.12; // 12% annual interest
+    var monthlyRate = annualRate / 12;
+    
+    if (amount > 0 && term > 0) {
+      var monthlyPayment = amount * (monthlyRate * Math.pow(1 + monthlyRate, term)) / 
+                          (Math.pow(1 + monthlyRate, term) - 1);
+      var totalPayment = monthlyPayment * term;
+      var totalInterest = totalPayment - amount;
+      
+      c.estimate = {
+        monthlyPayment: monthlyPayment,
+        totalPayment: totalPayment,
+        totalInterest: totalInterest
+      };
+    }
+  };
+  
+  // Submit application
+  c.submitApplication = function() {
+    // Validate age
+    if (!c.validateAge()) {
+      return;
+    }
+    
+    // Validate file upload
+    var fileInput = document.getElementById('validIdFile');
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+      c.errorMessage = 'Please upload a valid government-issued ID.';
+      return;
+    }
+    
+    var file = fileInput.files[0];
+    
+    // Validate file type
+    var allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (allowedTypes.indexOf(file.type) === -1) {
+      c.errorMessage = 'Invalid file type. Please upload PDF, JPG, or PNG only.';
+      return;
+    }
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      c.errorMessage = 'File size exceeds 5MB. Please upload a smaller file.';
+      return;
+    }
+    
+    // Validate loan amount vs income
+    if (parseFloat(c.application.loanAmount) > (parseFloat(c.application.monthlyIncome) * 36)) {
+      c.errorMessage = 'Loan amount cannot exceed 36 times your monthly income.';
+      return;
+    }
+    
+    c.submitting = true;
+    c.errorMessage = '';
+    
+    // Create application record
+    c.server.get({
+      action: 'createApplication',
+      data: c.application
+    }).then(function(response) {
+      if (response.data.success) {
+        var sysId = response.data.sysId;
+        c.applicationNumber = response.data.applicationNumber;
+        
+        // Upload file
+        c.uploadFile(sysId, file);
+      } else {
+        c.errorMessage = response.data.message || 'Failed to submit application.';
+        c.submitting = false;
+      }
+    });
+  };
+  
+  // Upload file attachment
+  c.uploadFile = function(sysId, file) {
+    var formData = new FormData();
+    formData.append('file', file);
+    formData.append('table_name', 'x_1603889_paycheng_loan_application');
+    formData.append('table_sys_id', sysId);
+    formData.append('attachmentName', file.name);
+    
+    spUtil.uploadAttachment(formData).then(function() {
+      c.successMessage = 'Your loan application has been successfully submitted! ' +
+                        'You will receive an email confirmation shortly.';
+      c.submitting = false;
+      c.resetForm();
+    }, function(error) {
+      c.errorMessage = 'Application created but file upload failed. Please contact support.';
+      c.submitting = false;
+    });
+  };
+  
+  // Validate age
+  c.validateAge = function() {
+    var birthdate = new Date(c.application.birthdate);
+    var today = new Date();
+    var age = today.getFullYear() - birthdate.getFullYear();
+    var m = today.getMonth() - birthdate.getMonth();
+    
+    if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
+      age--;
+    }
+    
+    if (age < 21) {
+      c.errorMessage = 'You must be at least 21 years old to apply.';
+      return false;
+    }
+    
+    if (age > 65) {
+      c.errorMessage = 'Maximum age for loan application is 65 years.';
+      return false;
+    }
+    
+    return true;
+  };
+  
+  // Reset form
+  c.resetForm = function() {
+    c.application = {
+      fullName: '',
+      birthdate: '',
+      contactNumber: '',
+      email: '',
+      address: '',
+      employerName: '',
+      jobPosition: '',
+      monthlyIncome: 0,
+      yearsEmployed: 0,
+      loanAmount: 0,
+      desiredTerm: '12',
+      loanPurpose: '',
+      existingLoans: 0,
+      monthlyExpenses: 0,
+      validId: null
+    };
+    document.getElementById('validIdFile').value = '';
+    c.estimate = {};
+  };
+}]]></client_script>
+    <controller_as>c</controller_as>
+    <css/>
+    <data_table>x_1603889_paycheng_loan_application</data_table>
+    <demo_data/>
+    <description>Loan Application Form for Paycheng Bank</description>
+    <docs/>
+    <field_list/>
+    <has_instance>true</has_instance>
+    <id>paycheng_loan_application_form</id>
+    <internal>false</internal>
+    <link/>
+    <name>Loan Application Form</name>
+    <option_schema/>
+    <public>true</public>
+    <roles/>
+    <script><![CDATA[(function() {
+  data.action = input.action;
+  
+  if (input.action === 'createApplication') {
+    try {
+      var gr = new GlideRecord('x_1603889_paycheng_loan_application');
+      gr.initialize();
+      gr.u_full_name = input.data.fullName;
+      gr.u_birthdate = input.data.birthdate;
+      gr.u_contact_number = input.data.contactNumber;
+      gr.u_email = input.data.email;
+      gr.u_address = input.data.address;
+      gr.u_employer_name = input.data.employerName;
+      gr.u_job_position = input.data.jobPosition;
+      gr.u_monthly_income = input.data.monthlyIncome;
+      gr.u_years_employed = input.data.yearsEmployed;
+      gr.u_loan_amount = input.data.loanAmount;
+      gr.u_desired_term_months = input.data.desiredTerm;
+      gr.u_loan_purpose = input.data.loanPurpose;
+      gr.u_existing_loans = input.data.existingLoans || 0;
+      gr.u_monthly_expenses = input.data.monthlyExpenses;
+      gr.u_application_status = 'submitted';
+      
+      var sysId = gr.insert();
+      
+      if (sysId) {
+        data.success = true;
+        data.sysId = sysId;
+        data.applicationNumber = gr.number.toString();
+      } else {
+        data.success = false;
+        data.message = 'Failed to create application record.';
+      }
+    } catch (ex) {
+      data.success = false;
+      data.message = ex.message;
+    }
+  }
+})();]]></script>
+    <servicenow>false</servicenow>
+    <sys_class_name>sp_widget</sys_class_name>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>widget_loan_app_form</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>Loan Application Form</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sp_widget_paycheng_loan_application_form</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <template><![CDATA[<div class="loan-card">
+  <h2 class="text-center mb-4">Personal Loan Application</h2>
+  
+  <form ng-submit="c.submitApplication()">
+    <!-- Personal Information -->
+    <div class="form-section">
+      <h4>Personal Information</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Full Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" ng-model="c.application.fullName" required>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Birthdate <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" ng-model="c.application.birthdate" required>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Contact Number <span class="text-danger">*</span></label>
+            <input type="tel" class="form-control" ng-model="c.application.contactNumber" 
+                   pattern="[0-9]{11}" placeholder="09XXXXXXXXX" required>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" ng-model="c.application.email" required>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Complete Address <span class="text-danger">*</span></label>
+        <textarea class="form-control" ng-model="c.application.address" rows="2" required></textarea>
+      </div>
+    </div>
+    
+    <!-- Employment Details -->
+    <div class="form-section">
+      <h4>Employment Details</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Employer Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" ng-model="c.application.employerName" required>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Job Position <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" ng-model="c.application.jobPosition" required>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Monthly Income (₱) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" ng-model="c.application.monthlyIncome" 
+                   min="0" step="0.01" required ng-change="c.calculateEstimate()">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Years Employed <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" ng-model="c.application.yearsEmployed" 
+                   min="0" step="0.5" required>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loan Details -->
+    <div class="form-section">
+      <h4>Loan Details</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Loan Amount (₱) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" ng-model="c.application.loanAmount" 
+                   min="10000" max="5000000" step="1000" required ng-change="c.calculateEstimate()">
+            <small class="form-text text-muted">Minimum: ₱10,000 | Maximum: ₱5,000,000</small>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Loan Term (months) <span class="text-danger">*</span></label>
+            <select class="form-control" ng-model="c.application.desiredTerm" required ng-change="c.calculateEstimate()">
+              <option value="12">12 months</option>
+              <option value="24">24 months</option>
+              <option value="36">36 months</option>
+              <option value="48">48 months</option>
+              <option value="60">60 months</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Loan Purpose <span class="text-danger">*</span></label>
+        <select class="form-control" ng-model="c.application.loanPurpose" required>
+          <option value="">Select purpose...</option>
+          <option value="home_improvement">Home Improvement</option>
+          <option value="medical">Medical</option>
+          <option value="education">Education</option>
+          <option value="business">Business</option>
+          <option value="debt_consolidation">Debt Consolidation</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- Financial Information -->
+    <div class="form-section">
+      <h4>Financial Information</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Existing Loans (₱)</label>
+            <input type="number" class="form-control" ng-model="c.application.existingLoans" 
+                   min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Monthly Expenses (₱) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" ng-model="c.application.monthlyExpenses" 
+                   min="0" step="0.01" required>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Document Upload -->
+    <div class="form-section">
+      <h4>Valid ID Upload <span class="text-danger">*</span></h4>
+      <div class="form-group">
+        <label>Upload Government-Issued ID</label>
+        <input type="file" id="validIdFile" accept=".pdf,.jpg,.jpeg,.png" 
+               ng-model="c.application.validId" class="form-control" required>
+        <small class="form-text text-muted">
+          Accepted formats: PDF, JPG, PNG | Maximum size: 5MB
+        </small>
+      </div>
+    </div>
+    
+    <!-- Loan Estimate -->
+    <div class="alert alert-info" ng-if="c.estimate.monthlyPayment">
+      <h5>Estimated Monthly Payment</h5>
+      <p class="mb-1"><strong>Monthly Payment:</strong> ₱{{c.estimate.monthlyPayment | number:2}}</p>
+      <p class="mb-1"><strong>Total Amount to Pay:</strong> ₱{{c.estimate.totalPayment | number:2}}</p>
+      <p class="mb-0"><strong>Total Interest:</strong> ₱{{c.estimate.totalInterest | number:2}}</p>
+    </div>
+    
+    <!-- Submit Button -->
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-paycheng btn-lg" ng-disabled="c.submitting">
+        <span ng-if="!c.submitting">Submit Application</span>
+        <span ng-if="c.submitting"><i class="fa fa-spinner fa-spin"></i> Processing...</span>
+      </button>
+    </div>
+  </form>
+  
+  <!-- Success Message -->
+  <div class="alert alert-success mt-4" ng-if="c.successMessage">
+    <h4><i class="fa fa-check-circle"></i> Application Submitted!</h4>
+    <p>{{c.successMessage}}</p>
+    <p>Your application number is: <strong>{{c.applicationNumber}}</strong></p>
+  </div>
+  
+  <!-- Error Message -->
+  <div class="alert alert-danger mt-4" ng-if="c.errorMessage">
+    <i class="fa fa-exclamation-triangle"></i> {{c.errorMessage}}
+  </div>
+</div>]]></template>
+    <widget_script/>
+    <widget_type>standard</widget_type>
+</sp_widget>
+

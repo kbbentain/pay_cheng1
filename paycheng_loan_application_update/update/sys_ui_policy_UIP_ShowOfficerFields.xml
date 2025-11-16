@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sys_ui_policy action="INSERT_OR_UPDATE" active="true" name="Show Officer Fields Only in Review" sys_class_name="sys_ui_policy" sys_id="ui_policy_show_officer_fields" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sys_ui_policy_UIP_ShowOfficerFields" table="x_1603889_paycheng_loan_application">
+    <active>true</active>
+    <category>default</category>
+    <description>Show officer fields only when application is under review or decided</description>
+    <name>Show Officer Fields Only in Review</name>
+    <on_load>false</on_load>
+    <on_load_form>true</on_load_form>
+    <on_load_table>false</on_load_table>
+    <on_save>false</on_save>
+    <order>100</order>
+    <priority>100</priority>
+    <short_description>Show officer fields only in review</short_description>
+    <sys_class_name>sys_ui_policy</sys_class_name>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>ui_policy_show_officer_fields</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>Show Officer Fields Only in Review</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sys_ui_policy_UIP_ShowOfficerFields</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <table>x_1603889_paycheng_loan_application</table>
+    <ui_type>0</ui_type>
+    <validator_message/>
+</sys_ui_policy>
+

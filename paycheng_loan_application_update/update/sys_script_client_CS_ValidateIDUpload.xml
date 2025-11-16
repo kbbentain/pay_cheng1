@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sys_script_client action="INSERT_OR_UPDATE" active="true" applies_to="all" description="Validate ID upload and loan amount on submit" name="Validate ID Upload on Submit" sys_class_name="sys_script_client" sys_id="cs_validate_id_upload" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sys_script_client_CS_ValidateIDUpload" table="x_1603889_paycheng_loan_application" type="onSubmit" ui_type="0">
+    <active>true</active>
+    <applies_extended>false</applies_extended>
+    <applies_to>all</applies_to>
+    <condition/>
+    <description>Validate ID upload and loan amount on submit</description>
+    <field/>
+    <name>Validate ID Upload on Submit</name>
+    <order>100</order>
+    <script><![CDATA[function onSubmit() {
+    // Check if Valid ID is attached
+    var attachmentCount = g_form.getAttachmentCount();
+    
+    if (attachmentCount == 0) {
+        g_form.addErrorMessage('Please upload a valid government-issued ID before submitting.');
+        return false;
+    }
+    
+    // Validate loan amount
+    var loanAmount = g_form.getValue('u_loan_amount');
+    var monthlyIncome = g_form.getValue('u_monthly_income');
+    
+    if (parseFloat(loanAmount) > (parseFloat(monthlyIncome) * 36)) {
+        g_form.addErrorMessage('Loan amount cannot exceed 36 times your monthly income.');
+        return false;
+    }
+    
+    return true;
+}]]></script>
+    <sys_class_name>sys_script_client</sys_class_name>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>cs_validate_id_upload</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>Validate ID Upload on Submit</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sys_script_client_CS_ValidateIDUpload</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <table>x_1603889_paycheng_loan_application</table>
+    <type>onSubmit</type>
+    <ui_type>0</ui_type>
+    <view/>
+</sys_script_client>
+

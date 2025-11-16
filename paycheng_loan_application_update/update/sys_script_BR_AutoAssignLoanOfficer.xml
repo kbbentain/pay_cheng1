@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sys_script action="INSERT_OR_UPDATE" active="true" name="Auto-Assign Loan Officer" order="400" sys_class_name="sys_script" sys_id="br_auto_assign_officer" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sys_script_BR_AutoAssignLoanOfficer" when="after">
+    <abort_action>false</abort_action>
+    <action>insert</action>
+    <api_name>Auto-Assign Loan Officer</api_name>
+    <caller_access/>
+    <client_callable>false</client_callable>
+    <collection>x_1603889_paycheng_loan_application</collection>
+    <condition>u_application_status == 'submitted'</condition>
+    <description>Auto-assign loan officer when application is submitted</description>
+    <execute_function/>
+    <filter_condition/>
+    <is_rest>false</is_rest>
+    <ns><![CDATA[global]]></ns>
+    <result><![CDATA[(function executeRule(current, previous /*null when async*/) {
+    // Find available loan officer (role: x_1603889_paycheng.loan_officer)
+    var officer = new GlideRecord('sys_user');
+    officer.addActiveQuery();
+    officer.addQuery('roles', 'CONTAINS', 'x_1603889_paycheng.loan_officer');
+    officer.orderBy('sys_created_on'); // Assign to least recently created for load balancing
+    officer.setLimit(1);
+    officer.query();
+    
+    if (officer.next()) {
+        current.u_assigned_officer = officer.sys_id;
+        current.u_application_status = 'under_review';
+        current.update();
+    }
+})(current, previous);]]></result>
+    <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+    // Find available loan officer (role: x_1603889_paycheng.loan_officer)
+    var officer = new GlideRecord('sys_user');
+    officer.addActiveQuery();
+    officer.addQuery('roles', 'CONTAINS', 'x_1603889_paycheng.loan_officer');
+    officer.orderBy('sys_created_on'); // Assign to least recently created for load balancing
+    officer.setLimit(1);
+    officer.query();
+    
+    if (officer.next()) {
+        current.u_assigned_officer = officer.sys_id;
+        current.u_application_status = 'under_review';
+        current.update();
+    }
+})(current, previous);]]></script>
+    <sys_class_name>sys_script</sys_class_name>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>br_auto_assign_officer</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>Auto-Assign Loan Officer</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sys_script_BR_AutoAssignLoanOfficer</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <template/>
+    <when>after</when>
+</sys_script>
+

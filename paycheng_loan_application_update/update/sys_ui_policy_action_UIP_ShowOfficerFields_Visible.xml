@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sys_ui_policy_action action="INSERT_OR_UPDATE" name="Show Officer Fields Only in Review" order="100" sys_class_name="sys_ui_policy_action" sys_id="ui_policy_action_officer_visible" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sys_ui_policy_action_UIP_ShowOfficerFields_Visible" ui_policy="ui_policy_show_officer_fields">
+    <action>visible</action>
+    <field>u_assigned_officer</field>
+    <name>Show Officer Fields Only in Review</name>
+    <order>100</order>
+    <short_description/>
+    <sys_class_name>sys_ui_policy_action</sys_class_name>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>ui_policy_action_officer_visible</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>Show Officer Fields Only in Review</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sys_ui_policy_action_UIP_ShowOfficerFields_Visible</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <ui_policy display_value="Show Officer Fields Only in Review" source="ui_policy_show_officer_fields">ui_policy_show_officer_fields</ui_policy>
+    <value>true</value>
+</sys_ui_policy_action>
+

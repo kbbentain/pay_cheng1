@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sys_ui_action action="INSERT_OR_UPDATE" action_name="reject_loan" active="true" client="false" form_button="true" form_context_menu="true" form_link="false" insert="false" list_button="false" list_context_menu="false" list_link="false" name="Reject Loan" onshow="false" position="RELATIVE" show_insert="false" show_multiple_update="false" show_query="false" show_update="true" sys_class_name="sys_ui_action" sys_id="ui_action_reject_loan" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sys_ui_action_UIA_RejectLoan" table="x_1603889_paycheng_loan_application">
+    <action_name>reject_loan</action_name>
+    <active>true</active>
+    <client>false</client>
+    <client_script_v2><![CDATA[function rejectLoan() {
+    var reason = prompt('Please provide reason for rejection:');
+    if (reason) {
+        g_form.setValue('u_officer_decision', 'rejected');
+        g_form.setValue('u_application_status', 'rejected');
+        g_form.setValue('u_officer_comments', reason);
+        g_form.save();
+    }
+}]]></client_script_v2>
+    <condition>u_application_status==under_review</condition>
+    <form_button>true</form_button>
+    <form_context_menu>true</form_context_menu>
+    <form_link>false</form_link>
+    <form_style/>
+    <glyph/>
+    <icon/>
+    <insert>false</insert>
+    <list_button>false</list_button>
+    <list_context_menu>false</list_context_menu>
+    <list_link>false</list_link>
+    <list_style/>
+    <name>Reject Loan</name>
+    <onclick>rejectLoan()</onclick>
+    <order>200</order>
+    <position>RELATIVE</position>
+    <show_insert>false</show_insert>
+    <show_multiple_update>false</show_multiple_update>
+    <show_query>false</show_query>
+    <show_update>true</show_update>
+    <sys_class_name>sys_ui_action</sys_class_name>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>ui_action_reject_loan</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>Reject Loan</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sys_ui_action_UIA_RejectLoan</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <table>x_1603889_paycheng_loan_application</table>
+</sys_ui_action>
+

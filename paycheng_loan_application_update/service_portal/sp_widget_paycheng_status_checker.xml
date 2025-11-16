@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sp_widget action="INSERT_OR_UPDATE" category="custom" css="" data_table="x_1603889_paycheng_loan_application" description="Check Loan Application Status" id="paycheng_status_checker" name="Check Application Status" public="true" sys_class_name="sp_widget" sys_id="widget_status_checker" sys_package="x_1603889_paycheng" sys_scope="x_1603889_paycheng" sys_update_name="sp_widget_paycheng_status_checker">
+    <category>custom</category>
+    <client_script><![CDATA[function($scope) {
+  var c = this;
+  
+  c.applicationNumber = '';
+  c.email = '';
+  c.application = null;
+  c.checking = false;
+  c.errorMessage = '';
+  
+  c.checkStatus = function() {
+    if (!c.applicationNumber || !c.email) {
+      c.errorMessage = 'Please enter both application number and email address.';
+      return;
+    }
+    
+    c.checking = true;
+    c.errorMessage = '';
+    c.application = null;
+    
+    c.server.get({
+      action: 'getStatus',
+      applicationNumber: c.applicationNumber,
+      email: c.email
+    }).then(function(response) {
+      c.checking = false;
+      
+      if (response.data.success) {
+        c.application = response.data.application;
+      } else {
+        c.errorMessage = response.data.message || 'Application not found. Please check your details.';
+      }
+    });
+  };
+  
+  c.getStatusClass = function() {
+    if (!c.application) return '';
+    
+    var status = c.application.status.toLowerCase();
+    if (status === 'approved') return 'badge-success';
+    if (status === 'rejected') return 'badge-danger';
+    if (status === 'under review') return 'badge-warning';
+    return 'badge-info';
+  };
+  
+  c.isStageActive = function(stage) {
+    if (!c.application) return false;
+    
+    var currentStatus = c.application.status.toLowerCase().replace(' ', '_');
+    var stages = ['submitted', 'under_review', 'approved', 'rejected'];
+    var currentIndex = stages.indexOf(currentStatus);
+    var stageIndex = stages.indexOf(stage);
+    
+    return stageIndex <= currentIndex;
+  };
+}]]></client_script>
+    <controller_as>c</controller_as>
+    <css/>
+    <data_table>x_1603889_paycheng_loan_application</data_table>
+    <demo_data/>
+    <description>Check Loan Application Status</description>
+    <docs/>
+    <field_list/>
+    <has_instance>true</has_instance>
+    <id>paycheng_status_checker</id>
+    <internal>false</internal>
+    <link/>
+    <name>Check Application Status</name>
+    <option_schema/>
+    <public>true</public>
+    <roles/>
+    <script><![CDATA[(function() {
+  data.action = input.action;
+  
+  if (input.action === 'getStatus') {
+    try {
+      var gr = new GlideRecord('x_1603889_paycheng_loan_application');
+      gr.addQuery('number', input.applicationNumber);
+      gr.addQuery('u_email', input.email);
+      gr.query();
+      
+      if (gr.next()) {
+        data.success = true;
+        data.application = {
+          number: gr.number.toString(),
+          fullName: gr.u_full_name.toString(),
+          loanAmount: gr.u_loan_amount.toString(),
+          submissionDate: gr.u_submission_date.getDisplayValue(),
+          status: gr.u_application_status.getDisplayValue(),
+          decisionDate: gr.u_decision_date.getDisplayValue()
+        };
+      } else {
+        data.success = false;
+        data.message = 'No application found with the provided details.';
+      }
+    } catch (ex) {
+      data.success = false;
+      data.message = ex.message;
+    }
+  }
+})();]]></script>
+    <servicenow>false</servicenow>
+    <sys_class_name>sp_widget</sys_class_name>
+    <sys_created_by>admin</sys_created_by>
+    <sys_created_on>2025-11-16 15:00:00</sys_created_on>
+    <sys_id>widget_status_checker</sys_id>
+    <sys_mod_count>0</sys_mod_count>
+    <sys_name>Check Application Status</sys_name>
+    <sys_package display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_package>
+    <sys_policy/>
+    <sys_scope display_value="Paycheng" source="x_1603889_paycheng">x_1603889_paycheng</sys_scope>
+    <sys_update_name>sp_widget_paycheng_status_checker</sys_update_name>
+    <sys_updated_by>admin</sys_updated_by>
+    <sys_updated_on>2025-11-16 15:00:00</sys_updated_on>
+    <template><![CDATA[<div class="loan-card">
+  <h2 class="text-center mb-4">Check Application Status</h2>
+  
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="form-group">
+        <label>Application Number</label>
+        <input type="text" class="form-control" ng-model="c.applicationNumber" 
+               placeholder="Enter your application number (e.g., LOAN123456)">
+      </div>
+      
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" class="form-control" ng-model="c.email" 
+               placeholder="Enter your email address">
+      </div>
+      
+      <div class="text-center">
+        <button class="btn btn-paycheng" ng-click="c.checkStatus()" ng-disabled="c.checking">
+          <span ng-if="!c.checking">Check Status</span>
+          <span ng-if="c.checking"><i class="fa fa-spinner fa-spin"></i> Checking...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Status Result -->
+  <div class="mt-4" ng-if="c.application">
+    <div class="alert alert-info">
+      <h4>Application Details</h4>
+      <table class="table table-bordered bg-white">
+        <tr>
+          <td><strong>Application Number:</strong></td>
+          <td>{{c.application.number}}</td>
+        </tr>
+        <tr>
+          <td><strong>Applicant Name:</strong></td>
+          <td>{{c.application.fullName}}</td>
+        </tr>
+        <tr>
+          <td><strong>Loan Amount:</strong></td>
+          <td>₱{{c.application.loanAmount | number:2}}</td>
+        </tr>
+        <tr>
+          <td><strong>Submission Date:</strong></td>
+          <td>{{c.application.submissionDate}}</td>
+        </tr>
+        <tr>
+          <td><strong>Current Status:</strong></td>
+          <td>
+            <span class="badge" ng-class="c.getStatusClass()">
+              {{c.application.status}}
+            </span>
+          </td>
+        </tr>
+        <tr ng-if="c.application.decisionDate">
+          <td><strong>Decision Date:</strong></td>
+          <td>{{c.application.decisionDate}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Error Message -->
+  <div class="alert alert-danger mt-4" ng-if="c.errorMessage">
+    <i class="fa fa-exclamation-triangle"></i> {{c.errorMessage}}
+  </div>
+</div>]]></template>
+    <widget_script/>
+    <widget_type>standard</widget_type>
+</sp_widget>
+
